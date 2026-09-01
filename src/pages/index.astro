@@ -1,0 +1,139 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PhotoGrid from '../components/PhotoGrid.astro';
+import { getPhotos, getPhotoByPrefix } from '../lib/photos';
+
+const hero = getPhotoByPrefix('hero');
+const photos = getPhotos().filter((p) => p !== hero);
+const featured = photos.slice(0, 4);
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="Home">
+  <section class="hero section">
+    <div class="container hero__grid">
+      <div class="hero__photo">
+        {
+          hero ? (
+            <Image
+              src={hero.image}
+              alt="Yuzu"
+              width={640}
+              height={640}
+              format="webp"
+              loading="eager"
+              fetchpriority="high"
+            />
+          ) : (
+            <div class="hero__placeholder">
+              <p>
+                Add <code>hero.png</code> (or <code>hero.jpg</code>) to
+                <br /><code>src/assets/photos/</code> for a photo here.
+              </p>
+            </div>
+          )
+        }
+      </div>
+      <div class="hero__text">
+        <h1>Yuzu</h1>
+        <p class="hero__subtitle">Shih-Tzu &times; Poodle mix &middot; <em>Add his dates here, e.g. 2015 &ndash; 2026</em></p>
+        <p>
+          <em
+            >This is the spot to write a couple of warm sentences about Yuzu —
+            his personality, what made him special, how he became part of
+            your family. Keep it short; the photos and timeline do the rest
+            of the storytelling.</em
+          >
+        </p>
+        <div class="hero__actions">
+          <a class="button" href={`${base}gallery/`}>See his photos</a>
+          <a class="button button--ghost" href={`${base}timeline/`}>His story</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="container">
+      <h2>A few favorites</h2>
+      <PhotoGrid photos={featured} />
+      {
+        featured.length > 0 && (
+          <p class="text-center" style="margin-top: 2rem;">
+            <a href={`${base}gallery/`}>See all photos →</a>
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section text-center">
+    <div class="container">
+      <h2>Leave a memory</h2>
+      <p class="text-muted">
+        If you knew Yuzu, we'd love to hear about it.
+      </p>
+      <a class="button" href={`${base}guestbook/`}>Sign the guestbook</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 800px) {
+    .hero__grid {
+      grid-template-columns: 1fr 1.2fr;
+    }
+  }
+
+  .hero__photo :global(img) {
+    border-radius: var(--radius);
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .hero__placeholder {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--color-bg-alt);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text-muted);
+    padding: 1.5rem;
+  }
+
+  .hero__subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+  }
+
+  .hero__actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .button--ghost {
+    background: transparent;
+    color: var(--color-accent-dark);
+    border: 2px solid var(--color-accent);
+  }
+
+  .button--ghost:hover {
+    background: var(--color-accent);
+    color: var(--color-cream);
+  }
+</style>

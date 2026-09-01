@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// 1. Create a free account at https://formspree.io
+// 2. Create a new form, and copy the form ID from the endpoint it gives you
+//    (looks like https://formspree.io/f/abcdwxyz)
+// 3. Paste it in below, replacing YOUR_FORM_ID.
+// See the README for the full walkthrough.
+const FORM_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+const isPlaceholder = FORM_ENDPOINT.includes('YOUR_FORM_ID');
+---
+
+<BaseLayout title="Guestbook">
+  <section class="section">
+    <div class="container container--narrow">
+      <h1>Guestbook</h1>
+      <p class="text-muted">
+        If you knew Yuzu, leave a note — a memory, a photo you took of him, or
+        just a hello.
+      </p>
+
+      {
+        isPlaceholder && (
+          <p class="card notice">
+            ⚠️ The guestbook form isn't wired up yet. This message will only
+            show on the deployed site until a real Formspree form ID replaces{' '}
+            <code>YOUR_FORM_ID</code> in <code>src/pages/guestbook.astro</code>{' '}
+            — see the README for setup steps.
+          </p>
+        )
+      }
+
+      <form id="guestbook-form" class="card" action={FORM_ENDPOINT} method="POST">
+        <label>
+          Your name
+          <input type="text" name="name" required maxlength="80" />
+        </label>
+        <label>
+          Your message
+          <textarea name="message" required rows="4" maxlength="1000" />
+        </label>
+        <!-- honeypot field to deter simple spam bots -->
+        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+        <button type="submit" class="button">Sign the guestbook</button>
+      </form>
+
+      <p id="guestbook-status" role="status" hidden></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('guestbook-form') as HTMLFormElement | null;
+  const status = document.getElementById('guestbook-status');
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!status) return;
+
+    const data = new FormData(form);
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: data,
+        headers: { Accept: 'application/json' },
+      });
+
+      status.hidden = false;
+      if (response.ok) {
+        form.hidden = true;
+        status.textContent = 'Thank you — your message has been sent. 🐾';
+      } else {
+        status.textContent = 'Something went wrong. Please try again in a moment.';
+      }
+    } catch {
+      status.hidden = false;
+      status.textContent = 'Something went wrong. Please check your connection and try again.';
+    }
+  });
+</script>
+
+<style>
+  .container--narrow {
+    max-width: 640px;
+  }
+
+  .notice {
+    border-color: var(--color-accent);
+    background: #fff3e6;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-weight: 600;
+  }
+
+  input,
+  textarea {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: white;
+    color: var(--color-text);
+  }
+
+  #guestbook-status {
+    margin-top: 1rem;
+    font-weight: 600;
+  }
+</style>
