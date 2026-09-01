@@ -10,10 +10,10 @@ export interface TimelineEvent {
 // in the order they appear here, so put them in chronological order.
 export const timeline: TimelineEvent[] = [
   {
-    date: 'Add a date',
-    title: 'Gotcha day',
+    date: 'October 31st, 2021',
+    title: 'Yuzu is born',
     description:
-      'Replace this with the story of how Yuzu joined your family — where you found him, why you picked the name Yuzu, first impressions.',
+      'According to legend, this baby was born.',
   },
   {
     date: 'Add a date',
