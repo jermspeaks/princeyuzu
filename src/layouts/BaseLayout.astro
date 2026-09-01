@@ -1,6 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { getPhotoByPrefix } from '../lib/photos';
 import '../styles/global.css';
 
 interface Props {
@@ -12,6 +14,18 @@ const {
   title,
   description = 'A little site to celebrate Yuzu, a very good shih-tzu poodle mix.',
 } = Astro.props;
+
+// Favicon comes from a real photo of Yuzu. Add a dedicated close-up photo
+// named favicon.png/.jpg to src/assets/photos/ to use a different shot than
+// the homepage hero — otherwise the hero photo is reused. Both sizes below
+// are cropped to a centered square (Astro's default when width === height).
+const faviconSource = getPhotoByPrefix('favicon') ?? getPhotoByPrefix('hero');
+const favicon32 = faviconSource
+  ? await getImage({ src: faviconSource.image, format: 'png', width: 32, height: 32 })
+  : null;
+const favicon180 = faviconSource
+  ? await getImage({ src: faviconSource.image, format: 'png', width: 180, height: 180 })
+  : null;
 ---
 
 <!doctype html>
@@ -19,7 +33,16 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    {
+      favicon32 && favicon180 ? (
+        <>
+          <link rel="icon" type="image/png" sizes="32x32" href={favicon32.src} />
+          <link rel="apple-touch-icon" sizes="180x180" href={favicon180.src} />
+        </>
+      ) : (
+        <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+      )
+    }
     <meta name="description" content={description} />
     <title>{title} · Yuzu</title>
   </head>
