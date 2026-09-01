@@ -10,20 +10,26 @@ export interface TimelineEvent {
 // in the order they appear here, so put them in chronological order.
 export const timeline: TimelineEvent[] = [
   {
-    date: 'October 31st, 2021',
-    title: 'Yuzu is born',
-    description:
-      'According to legend, this baby was born.',
+    date: "October 31st, 2021",
+    title: "Yuzu is born",
+    description: "According to legend, this baby was born.",
   },
   {
-    date: 'Add a date',
-    title: 'A favorite memory',
+    date: "Dec 31st, 2021",
+    title: "Yuzu meets his mommy",
     description:
-      'A specific moment that captures his personality — a funny habit, a favorite walk, a trip.',
+      "After a tumultuous flight from Denver, Yuzu met his mommy. She warmed her heart for nine weeks prior. There is instant love.",
   },
   {
-    date: 'Add a date',
-    title: 'Another milestone',
-    description: 'Add as many of these as you like.',
+    date: "May 6th, 2022",
+    title: "Yuzu meets his papa",
+    description:
+      "His mommy and papa met each other the day before. Then Yuzu met him the day after.",
+  },
+  {
+    date: "May 20th, 2022",
+    title: "Yuzu meets his grandparents",
+    description:
+      "His grandma gave him his own filet mignon. He is forever changed.",
   },
 ];

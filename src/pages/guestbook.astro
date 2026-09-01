@@ -1,13 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { guestbookEntries } from '../data/guestbook';
 
 // 1. Create a free account at https://formspree.io
 // 2. Create a new form, and copy the form ID from the endpoint it gives you
-//    (looks like https://formspree.io/f/abcdwxyz)
+//    (looks like https://formspree.io/f/abcdwxyz — the ID is the last part)
 // 3. Paste it in below, replacing YOUR_FORM_ID.
-// See the README for the full walkthrough.
-const FORM_ENDPOINT = 'https://formspree.io/f/mjyvyygd';
-const isPlaceholder = FORM_ENDPOINT.includes('YOUR_FORM_ID');
+// See the README for the full walkthrough, including how to display past
+// messages (src/data/guestbook.ts).
+const FORM_ID: string = 'mjyvyygd';
+const isPlaceholder = FORM_ID === 'YOUR_FORM_ID';
 ---
 
 <BaseLayout title="Guestbook">
@@ -30,53 +32,62 @@ const isPlaceholder = FORM_ENDPOINT.includes('YOUR_FORM_ID');
         )
       }
 
-      <form id="guestbook-form" class="card" action={FORM_ENDPOINT} method="POST">
-        <label>
-          Your name
-          <input type="text" name="name" required maxlength="80" />
-        </label>
-        <label>
-          Your message
-          <textarea name="message" required rows="4" maxlength="1000" />
-        </label>
+      <div data-fs-success />
+      <div data-fs-error />
+
+      <form id="guestbook-form" class="card" data-form-id={FORM_ID}>
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" data-fs-field required maxlength="80" />
+        <span data-fs-error="name" />
+
+        <label for="message">Your message</label>
+        <textarea id="message" name="message" data-fs-field required rows="4" maxlength="1000" />
+        <span data-fs-error="message" />
+
         <!-- honeypot field to deter simple spam bots -->
         <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
-        <button type="submit" class="button">Sign the guestbook</button>
-      </form>
 
-      <p id="guestbook-status" role="status" hidden></p>
+        <button type="submit" data-fs-submit-btn class="button">Sign the guestbook</button>
+      </form>
     </div>
   </section>
+
+  {
+    guestbookEntries.length > 0 && (
+      <section class="section section--alt">
+        <div class="container container--narrow">
+          <h2>Messages from friends</h2>
+          <ul class="guestbook-entries">
+            {guestbookEntries.map((entry) => (
+              <li class="card guestbook-entry">
+                <p class="guestbook-entry__message">“{entry.message}”</p>
+                <p class="guestbook-entry__meta text-muted">
+                  — {entry.name}
+                  {entry.date && `, ${entry.date}`}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
 
 <script>
-  const form = document.getElementById('guestbook-form') as HTMLFormElement | null;
-  const status = document.getElementById('guestbook-status');
+  import { initForm } from '@formspree/ajax';
 
-  form?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!status) return;
+  const form = document.querySelector<HTMLFormElement>('#guestbook-form');
+  const formId = form?.dataset.formId;
 
-    const data = new FormData(form);
-    try {
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: data,
-        headers: { Accept: 'application/json' },
-      });
-
-      status.hidden = false;
-      if (response.ok) {
-        form.hidden = true;
-        status.textContent = 'Thank you — your message has been sent. 🐾';
-      } else {
-        status.textContent = 'Something went wrong. Please try again in a moment.';
-      }
-    } catch {
-      status.hidden = false;
-      status.textContent = 'Something went wrong. Please check your connection and try again.';
-    }
-  });
+  if (form && formId && formId !== 'YOUR_FORM_ID') {
+    // Resets the form on success by default; no onSuccess override needed.
+    initForm({
+      formElement: form,
+      formId,
+      useDefaultStyles: false,
+    });
+  }
 </script>
 
 <style>
@@ -92,15 +103,17 @@ const isPlaceholder = FORM_ENDPOINT.includes('YOUR_FORM_ID');
   form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0.4rem;
     margin-top: 2rem;
   }
 
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+  form label {
     font-weight: 600;
+    margin-top: 0.85rem;
+  }
+
+  form label:first-child {
+    margin-top: 0;
   }
 
   input,
@@ -114,8 +127,66 @@ const isPlaceholder = FORM_ENDPOINT.includes('YOUR_FORM_ID');
     color: var(--color-text);
   }
 
-  #guestbook-status {
-    margin-top: 1rem;
+  button[type='submit'] {
+    margin-top: 1.25rem;
+    align-self: flex-start;
+  }
+
+  /* Formspree AJAX state styling (useDefaultStyles: false above) */
+  [data-fs-error],
+  [data-fs-success] {
+    display: none;
+  }
+
+  [data-fs-success][data-fs-active] {
+    display: block;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: #ecf6ec;
+    border: 1px solid #bfe0bf;
+    color: #2f5d34;
+    font-weight: 600;
+  }
+
+  [data-fs-error=''][data-fs-active] {
+    display: block;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: #fbeaea;
+    border: 1px solid #efb8b8;
+    color: #8a2c2c;
+    font-weight: 600;
+  }
+
+  [data-fs-error]:not([data-fs-error=''])[data-fs-active] {
+    display: block;
+    color: #c0392b;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+  }
+
+  [data-fs-field][aria-invalid='true'] {
+    border-color: #c0392b;
+  }
+
+  .guestbook-entries {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .guestbook-entry__message {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+  }
+
+  .guestbook-entry__meta {
+    margin: 0;
     font-weight: 600;
   }
 </style>

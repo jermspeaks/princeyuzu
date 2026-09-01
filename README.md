@@ -58,19 +58,38 @@ like) accordingly.
 
 ## Setting up the guestbook (Formspree)
 
-The guestbook form posts to [Formspree](https://formspree.io), a free
-form-backend service (GitHub Pages can't run server code itself). Submitted
-messages arrive by email / in the Formspree dashboard — they won't
-automatically re-appear on the page, since there's no database to read from.
+The guestbook form submits via [Formspree](https://formspree.io) using their
+official [`@formspree/ajax`](https://github.com/formspree/formspree-js)
+library (GitHub Pages can't run server code itself, so submission handling
+has to live somewhere else). Messages arrive in your Formspree dashboard /
+email — Formspree has no free way for a static site to read them back
+automatically, so past messages shown on the page are manually curated (see
+below), not live-synced.
 
-1. Create a free account at https://formspree.io.
-2. Create a new form. Formspree gives you an endpoint like
-   `https://formspree.io/f/abcdwxyz`.
-3. Open `src/pages/guestbook.astro` and replace `YOUR_FORM_ID` in the
-   `FORM_ENDPOINT` constant with your real form ID.
-4. Commit and push — done. Until you do this, the guestbook page shows a
+1. Create a free account at https://formspree.io and create a new form.
+2. Open `src/pages/guestbook.astro` and replace `YOUR_FORM_ID` — er, the
+   `FORM_ID` constant — with your real form ID (the last part of the
+   endpoint Formspree gives you, e.g. `abcdwxyz` from
+   `https://formspree.io/f/abcdwxyz`).
+3. Commit and push — done. Until you do this, the guestbook page shows a
    visible "not wired up yet" notice instead of silently swallowing
    submissions.
+
+### Displaying past messages
+
+Check your submissions at `https://formspree.io/forms/<your-form-id>/submissions`,
+then copy over the ones you'd like to share publicly into
+`src/data/guestbook.ts`:
+
+```ts
+export const guestbookEntries: GuestbookEntry[] = [
+  { name: 'Alex', message: 'Yuzu was the best!', date: 'August 2026' },
+];
+```
+
+Push, and they show up under "Messages from friends" on the guestbook page.
+If you'd rather automate this later (e.g. a GitHub Issue Form + Action that
+appends approved entries), that's a bigger lift — ask if you want it set up.
 
 ## Deploying (GitHub Pages + Actions)
 
