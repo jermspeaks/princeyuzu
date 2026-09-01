@@ -1,0 +1,102 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { friends } from '../../data/friends';
+import { getFriendPhotos } from '../../lib/friends';
+
+const base = import.meta.env.BASE_URL;
+
+const friendCards = friends.map((friend) => ({
+  friend,
+  cover: getFriendPhotos(friend.slug)[0],
+}));
+---
+
+<BaseLayout title="Friends">
+  <section class="section">
+    <div class="container">
+      <h1>Yuzu's friends</h1>
+      <p class="text-muted">The good boys and girls in Yuzu's circle.</p>
+
+      {
+        friendCards.length === 0 ? (
+          <p class="text-muted">
+            No friends yet — add some to <code>src/data/friends.ts</code> and
+            drop their photos in <code>src/assets/friends/</code>.
+          </p>
+        ) : (
+          <div class="friend-grid">
+            {friendCards.map(({ friend, cover }) => (
+              <a class="friend-card card" href={`${base}friends/${friend.slug}/`}>
+                <div class="friend-card__photo">
+                  {cover ? (
+                    <Image
+                      src={cover.image}
+                      alt=""
+                      width={320}
+                      height={320}
+                      format="webp"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="friend-card__placeholder">🐾</div>
+                  )}
+                </div>
+                <h2>{friend.name}</h2>
+                {friend.description && <p class="text-muted">{friend.description}</p>}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .friend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .friend-card {
+    display: block;
+    text-decoration: none;
+    color: var(--color-text);
+    padding: 1.25rem;
+  }
+
+  .friend-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .friend-card h2 {
+    font-size: 1.15rem;
+    margin: 1rem 0 0.35rem;
+  }
+
+  .friend-card p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .friend-card__photo :global(img) {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 0.75rem;
+  }
+
+  .friend-card__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    font-size: 2.5rem;
+    background: var(--color-bg-alt);
+    border: 2px dashed var(--color-border);
+    border-radius: 0.75rem;
+  }
+</style>

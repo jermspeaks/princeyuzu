@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PhotoGrid from '../../components/PhotoGrid.astro';
+import { friends } from '../../data/friends';
+import { getFriendPhotos } from '../../lib/friends';
+
+export function getStaticPaths() {
+  return friends.map((friend) => ({
+    params: { slug: friend.slug },
+    props: { friend },
+  }));
+}
+
+const { friend } = Astro.props;
+const photos = getFriendPhotos(friend.slug);
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={friend.name}>
+  <section class="section">
+    <div class="container">
+      <p><a href={`${base}friends/`}>&larr; All friends</a></p>
+      <h1>{friend.name}</h1>
+      {friend.description && <p class="text-muted">{friend.description}</p>}
+      <PhotoGrid photos={photos} />
+    </div>
+  </section>
+</BaseLayout>
