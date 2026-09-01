@@ -4,13 +4,13 @@ A little site for Yuzu — a shih-tzu poodle mix — with a homepage, photo
 gallery, timeline, and guestbook. Built with [Astro](https://astro.build),
 deployed to GitHub Pages via GitHub Actions.
 
-Live at: **https://jermspeaks.github.io/princeyuzu**
+Live at: **https://princeyuzu.com**
 
 ## Getting started
 
 ```bash
 npm install
-npm run dev       # http://localhost:4321/princeyuzu
+npm run dev       # http://localhost:4321
 ```
 
 ```bash
@@ -85,20 +85,38 @@ One-time setup in the GitHub repo:
 2. In the repo, go to **Settings → Pages**.
 3. Under **Build and deployment → Source**, choose **GitHub Actions** (not
    "Deploy from a branch").
-4. Push to `main` (or run the workflow manually from the **Actions** tab) —
-   the site deploys to `https://jermspeaks.github.io/princeyuzu`.
+4. Push to `main` (or run the workflow manually from the **Actions** tab).
 
-### If you ever rename the repo
+### Custom domain (princeyuzu.com via Porkbun)
 
-The site's `base` path is tied to the repo name. If you rename the repo (or
-move to a `username.github.io` root page), update `astro.config.mjs`:
+The site is served at the domain root (no `base` path) via a `public/CNAME`
+file containing `princeyuzu.com`, which Astro copies into every build.
 
-```js
-export default defineConfig({
-  site: 'https://jermspeaks.github.io',
-  base: '/princeyuzu', // set to '/' if this becomes a root user page
-});
-```
+**DNS records to add in Porkbun** (Domain Management → DNS Records) for the
+apex domain:
+
+| Type | Host | Answer |
+| --- | --- | --- |
+| A | `princeyuzu.com` (or leave host blank) | `185.199.108.153` |
+| A | `princeyuzu.com` (or leave host blank) | `185.199.109.153` |
+| A | `princeyuzu.com` (or leave host blank) | `185.199.110.153` |
+| A | `princeyuzu.com` (or leave host blank) | `185.199.111.153` |
+| CNAME | `www` | `jermspeaks.github.io` |
+
+(The four A records are GitHub Pages' fixed IPs — add all four, not just
+one, for redundancy. The `www` CNAME is optional, only needed if you want
+`www.princeyuzu.com` to also resolve.)
+
+**In the GitHub repo**, Settings → Pages → **Custom domain** → enter
+`princeyuzu.com` → Save. GitHub verifies DNS (can take a few minutes to
+hours to propagate) and provisions an HTTPS certificate automatically. Once
+the padlock/"Enforce HTTPS" checkbox becomes available, enable it.
+
+### If you ever change domains or move off a custom domain
+
+Update both `astro.config.mjs` (`site`) and `public/CNAME` (or delete
+`public/CNAME` and add a `base: '/repo-name'` if going back to the default
+`username.github.io/repo-name` URL).
 
 ## Project structure
 

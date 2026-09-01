@@ -1,8 +1,7 @@
 import { defineConfig } from 'astro/config';
 
-// Deployed via GitHub Pages as a project site:
-// https://jermspeaks.github.io/princeyuzu
+// Served on a custom domain via GitHub Pages — no `base` path needed since
+// the site is served from the domain root. See public/CNAME.
 export default defineConfig({
-  site: 'https://jermspeaks.github.io',
-  base: '/princeyuzu',
+  site: 'https://princeyuzu.com',
 });
